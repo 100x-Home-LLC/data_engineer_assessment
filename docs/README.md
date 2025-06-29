@@ -87,15 +87,141 @@ For MySQL Docker image reference:
 
 **Good luck! We look forward to your submission.**
 
-## Solutions and Instructions (Filed by Candidate)
+## Solutions and Instructions (Filed by Candidate):
 
-**Document your database design and solution here:**
+# ETL Pipeline - Job Assignment
 
-- Explain your schema and any design decisions
-- Give clear instructions on how to run and test your script
+## Project Summary
 
-**Document your ETL logic here:**
+A complete ETL pipeline to process nested JSON data into a normalized MySQL schema, including data cleaning, transformation, and loading.
 
-- Outline your approach and design
-- Provide instructions and code snippets for running the ETL
-- List any requirements
+## Schema Design:
+
+### Database: `home_db`
+
+| Table       | Description                         | Primary Key   | Foreign Keys                |
+| ----------- | ----------------------------------- | ------------- | --------------------------- |
+| `property`  | Main property metadata              | `Property_ID` | -                           |
+| `leads`     | Sales review and pipeline data      | `Property_ID` | FK → `property.Property_ID` |
+| `hoa`       | HOA fees and flag indicators        | `id`          | FK → `property.Property_ID` |
+| `valuation` | Market and rental pricing estimates | `id`          | FK → `property.Property_ID` |
+| `rehab`     | Renovation and flag details         | `id`          | FK → `property.Property_ID` |
+
+### Design Principles
+Design Principles and Decisions:
+Central Entity (property): This table serves as the anchor for all related data. Each record represents a distinct real estate listing. All other tables are dependent on this unique Property_ID.
+
+One-to-One / One-to-Many Relationships:
+Tables like leads, hoa, valuation, and rehab can have at most one corresponding record for each property. This reflects typical use-case where one property has one current valuation, one rehab scope, one HOA setting, and one lead record.
+
+Use of Foreign Keys:
+All dependent tables include foreign key constraints linking back to property. This ensures referential integrity and prevents orphan records.
+
+Auto-Incrementing Primary Keys:
+For non-central tables (rehab, hoa, valuation), the id column is used as the primary key, while Property_ID is maintained as a foreign key reference. This supports uniqueness within the table while linking to the main entity.
+
+Storage Optimization:
+TINYINT, SMALLINT, and FLOAT types are used to conserve storage while maintaining precision.
+VARCHAR lengths are kept tight based on expected field length (e.g., State is 2 characters, Flood flags are short booleans).
+
+Separation of Concerns:
+By splitting data into specific tables (e.g., separating financial estimates into valuation, and renovation details into rehab), the schema is modular and supports easier updates and maintenance.
+
+## How to Run the Scripts
+
+### Prerequisites:
+--MySQL Server 8.0
+--Python 3.8+
+--Database `home_db` must exist.
+
+### Create Tables:
+Run in order to preserve dependencies:
+
+```bash
+mysql -u <user> -p home_db < property_table.sql
+mysql -u <user> -p home_db < lead_table.sql
+mysql -u <user> -p home_db < hoa_table.sql
+mysql -u <user> -p home_db < valuation_table.sql
+mysql -u <user> -p home_db < rehab_table.sql
+```
+
+### Configure Environment
+
+Edit `.env.development`:
+
+```ini
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=password
+DB_NAME=home_db
+```
+## ETL Logic:
+
+### File Overview
+| File           | Description                                       |
+| -------------- | ------------------------------------------------- |
+| `main.py`      | Orchestrates the ETL pipeline                     |
+| `extract.py`   | Loads JSON, flattens & explodes nested fields     |
+| `transform.py` | Cleans data, splits into table-wise DataFrames    |
+| `cleaner.py`   | Functions for null cleanup and type normalization |
+| `database.py`  | Creates SQLAlchemy engine                         |
+| `config.py`    | Loads environment and config paths                |
+
+### Workflow:
+
+1. **Extract**:
+----JSON loaded via `extract.py`
+----Nested fields (`Valuation`, `HOA`, `Rehab`) exploded
+
+2. **Transform**:
+-----`transform.py` applies cleaning:
+       Replaces null-like values ("null", "NA", "None")
+       Standardizes booleans ("Yes" → `True`)
+       Fills categoricals with "Unknown"
+       Fills numericals with median
+       Field-to-table split driven by Excel config
+
+3. **Load**:
+------DataFrames loaded into MySQL using `to_sql()`
+
+### Sample Cleaning Code (from `transform.py`):
+```python
+leads_df = replace_null_like_values(leads_df)
+leads_df = fill_missing_categoricals(leads_df, ['Reviewed_Status', 'Source'])
+```
+## How to Run the Pipeline:
+
+### Install Dependencies
+```bash
+pip install pandas openpyxl mysql-connector-python SQLAlchemy python-dotenv
+```
+### Run the Pipeline
+```bash
+python main.py
+```
+All five tables will be created and populated.
+
+## Field Mapping
+The `Field Config.xlsx` determines which fields go into which tables:
+| Target Table | Example Fields                  |
+| ------------ | ------------------------------- |
+| `property`   | Address, State, SQFT\_Total     |
+| `leads`      | Reviewed\_Status, IRR           |
+
+## Requirements
+
+| Component       | Version                   |
+| --------------- | ------------------------- |
+| Python          | 3.8+                      |
+| MySQL           | 8.0+                      |
+| pandas          | >=1.1.0                   |
+| openpyxl        | For reading Excel config  |
+| mysql-connector | DB connection backend     |
+| SQLAlchemy      | ORM for MySQL             |
+| python-dotenv   | For environment variables |
+
+## Output
+After running `main.py`, MySQL database `home_db` will be populated with cleaned and validated data across 5 related tables.
+
+
