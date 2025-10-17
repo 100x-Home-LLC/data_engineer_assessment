@@ -1,0 +1,11 @@
+python version - 3.12.0
+Mysql version --8.0.43
+pip install pandas 
+pip install pymysql
+pip install mysql-connector-python
+
+import pandas as pd
+import pymysql
+import json
+from sqlalchemy import create_engine
+import mysql.connector

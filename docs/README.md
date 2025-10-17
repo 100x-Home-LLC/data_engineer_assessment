@@ -1,101 +1,32 @@
-# Data Engineering Assessment
 
-Welcome!  
-This exercise evaluates your core **data-engineering** skills:
 
-| Competency | Focus                                                         |
-| ---------- | ------------------------------------------------------------- |
-| SQL        | relational modelling, normalisation, DDL/DML scripting        |
-| Python ETL | data ingestion, cleaning, transformation, & loading (ELT/ETL) |
+### Steps i have followed
 
----
+- Used mysql workbench -8.0.43
+- used jupyterNotebook - 8.0.43
 
-## 0 Prerequisites & Setup
-
-> **Allowed technologies**
-
-- **Python ≥ 3.8** – all ETL / data-processing code
-- **MySQL 8** – the target relational database
-- **Lightweight helper libraries only** (e.g. `pandas`, `mysql-connector-python`).  
-  List every dependency in **`requirements.txt`** and justify anything unusual.
-- **No ORMs / auto-migration tools** – write plain SQL by hand.
+### Python
+  - have used pandas library 
+  - fetched the json file using DataFrame
+  - make connection with the mysql workbench using necessory install mysql-connector-python
+  - After connection is established , i fetch required columns and clean the data
+    Remove duplicates
+  - And for the nested datas in json file, performs normalization using pd.json_normalize
+  - Have created variable for source file and used in normalization
+  - then load the data to the created table in Mysql 
+  - Likewise loaded all the required datas to the concern table
+    and close the connection to the Mysql
 
 ---
 
-## 1 Clone the skeleton repo
+## Mysql
+- As the Docker is not working in my system due to space issue i have created the given
+  database in my local system and created given target tables with required data types 
+  as in the excel sheet 
+- And i have given required primary and foreign key constrain to the required fields
+- then datas is pushed from Python , then i check count of the tables
 
-```
-git clone https://github.com/100x-Home-LLC/data_engineer_assessment.git
-```
 
-✏️ Note: Rename the repo after cloning and add your full name.
+**I have uploaded all the .sql and .py files with the exported table dada from mysql **
 
-**Start the MySQL database in Docker:**
 
-```
-docker-compose -f docker-compose.initial.yml up --build -d
-```
-
-- Database is available on `localhost:3306`
-- Credentials/configuration are in the Docker Compose file
-- **Do not change** database name or credentials
-
-For MySQL Docker image reference:
-[MySQL Docker Hub](https://hub.docker.com/_/mysql)
-
----
-
-### Problem
-
-- You are provided with a raw JSON file containing property records is located in data/
-- Each row relates to a property. Each row mixes many unrelated attributes (property details, HOA data, rehab estimates, valuations, etc.).
-- There are multiple Columns related to this property.
-- The database is not normalized and lacks relational structure.
-- Use the supplied Field Config.xlsx (in data/) to understand business semantics.
-
-### Task
-
-- **Normalize the data:**
-
-  - Develop a Python ETL script to read, clean, transform, and load data into your normalized MySQL tables.
-  - Refer the field config document for the relation of business logic
-  - Use primary keys and foreign keys to properly capture relationships
-
-- **Deliverable:**
-  - Write necessary python and sql scripts
-  - Place your scripts in `sql/` and `scripts/`
-  - The scripts should take the initial json to your final, normalized schema when executed
-  - Clearly document how to run your script, dependencies, and how it integrates with your database.
-
-**Tech Stack:**
-
-- Python (include a `requirements.txt`)
-  Use **MySQL** and SQL for all database work
-- You may use any CLI or GUI for development, but the final changes must be submitted as python/ SQL scripts
-- **Do not** use ORM migrations—write all SQL by hand
-
----
-
-## Submission Guidelines
-
-- Edit the section to the bottom of this README with your solutions and instructions for each section at the bottom.
-- Place all scripts/code in their respective folders (`sql/`, `scripts/`, etc.)
-- Ensure all steps are fully **reproducible** using your documentation
-- Create a new private repo and invite the reviewer https://github.com/mantreshjain
-
----
-
-**Good luck! We look forward to your submission.**
-
-## Solutions and Instructions (Filed by Candidate)
-
-**Document your database design and solution here:**
-
-- Explain your schema and any design decisions
-- Give clear instructions on how to run and test your script
-
-**Document your ETL logic here:**
-
-- Outline your approach and design
-- Provide instructions and code snippets for running the ETL
-- List any requirements
