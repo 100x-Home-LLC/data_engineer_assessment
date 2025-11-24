@@ -73,7 +73,7 @@ For MySQL Docker image reference:
 - Edit the section to the bottom of this README with your solutions and instructions for each section at the bottom.
 - Ensure all steps are fully **reproducible** using your documentation
 - DO NOT MAKE THE REPOSITORY PUBLIC. ANY CANDIDATE WHO DOES IT WILL BE AUTO REJECTED.
-- Create a new private repo and invite the reviewer https://github.com/mantreshjain and https://github.com/siddhuorama
+- Create a new private repo and invite the reviewer https://github.com/siddhuorama
 
 ---
 
